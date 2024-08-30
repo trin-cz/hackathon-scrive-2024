@@ -7,6 +7,8 @@ import logging
 from .. import couchbase as cb, env
 from ..auth import IsAuthenticated
 from .. import types
+import requests
+from .. import tokens
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +23,7 @@ def list_documents():
 class Document:
     id: str
     title: str
+    json: str
 
 @strawberry.input
 class DocumentImportInput:
@@ -38,7 +41,23 @@ class Mutation:
     @strawberry.field(permission_classes=[IsAuthenticated])
     async def documents_import(self, doc: DocumentImportInput) -> Document:
         logger.info('Called Document Import: ' + doc.id)
-        docImported = Document(id=doc.id, title="Non-existing document")
+
+        url = "https://api-testbed.scrive.com/api/v2/documents/"+doc.id+"/get"
+        payload={}
+        headers = {
+            'Authorization': 'oauth_signature_method="PLAINTEXT", oauth_consumer_key="'+tokens.apitoken+'", oauth_token="'+tokens.accesstoken+'", oauth_signature="'+tokens.apisecret+'&'+tokens.accesssecret+'"'
+          , 'Cookie': 'lang="en"; lang-ssn="en"'
+        }
+        response = requests.request("GET", url, headers=headers, data=payload)
+        respJson = response.json()
+        docImported = Document(id=doc.id, title=respJson["title"], json=response.text)
+
+        cb.insert(env.get_couchbase_conf(),
+                  cb.DocSpec(bucket=env.get_couchbase_bucket(),
+                             collection='documents',
+                             key=docImported.id,
+                             data={'id': docImported.id, 'title': docImported.title, 'json':docImported.json}))
+
         return docImported
 
         
