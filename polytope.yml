@@ -1,242 +1,308 @@
 templates:
-- id: stack
-  run:
-  - couchbase
-  - id: init-cb-cluster
-    module: init-couchbase-cluster
-  - id: create-cb-bucket
-    module: create-couchbase-bucket
-    run-when:
-      after: init-cb-cluster
-  - id: init-cb-bucket
-    module: init-couchbase-bucket
-    run-when:
-      after: create-cb-bucket
+  - id: stack
+    run:
+      - couchbase
+      - id: init-cb-cluster
+        module: init-couchbase-cluster
+      - id: create-cb-bucket
+        module: create-couchbase-bucket
+        run-when:
+          after: init-cb-cluster
+      - id: init-cb-bucket
+        module: init-couchbase-bucket
+        run-when:
+          after: create-cb-bucket
 
-  - module: redpanda
-    run-when:
-      after: init-cb-bucket
-  - id: redpanda-console
-    module: redpanda-console
-    run-when:
-      after: init-cb-bucket
-  - id: kafka-connect
-    module: kafka-connect
-    run-when:
-      after: init-cb-bucket
-  - id: create-connectors
-    module: create-connectors
-    run-when:
-      after: init-cb-bucket
+      - module: redpanda
+        run-when:
+          after: init-cb-bucket
+      - id: redpanda-console
+        module: redpanda-console
+        run-when:
+          after: init-cb-bucket
+      - id: kafka-connect
+        module: kafka-connect
+        run-when:
+          after: init-cb-bucket
+      - id: create-connectors
+        module: create-connectors
+        run-when:
+          after: init-cb-bucket
 
-  - module: curity-db
-    run-when:
-      after: create-connectors 
-  - module: oauth-agent
-    run-when:
-      after: create-connectors 
-  - module: curity
-    run-when:
-      after: create-connectors 
-  - module: kong
-    run-when:
-      after: create-connectors 
-  - module: web-app 
-    run-when:
-      after: create-connectors 
-  - module: app-api
-    run-when:
-      after: create-connectors 
+      - module: curity-db
+        run-when:
+          after: create-connectors
+      - module: oauth-agent
+        run-when:
+          after: create-connectors
+      - module: curity
+        run-when:
+          after: create-connectors
+      - module: kong
+        run-when:
+          after: create-connectors
+      - module: web-app
+        run-when:
+          after: create-connectors
+      - module: app-api
+        run-when:
+          after: create-connectors
 
-- id: stack-fast
-  run:
-  - couchbase
-  - id: init-cb-cluster
-    module: init-couchbase-cluster
-  - id: create-cb-bucket
-    module: create-couchbase-bucket
-    run-when:
-      after: init-cb-cluster
-  - id: init-cb-bucket
-    module: init-couchbase-bucket
-    run-when:
-      after: create-cb-bucket
-  - module: redpanda
-  - module: redpanda-console
-  - module: kafka-connect
-  - module: create-connectors
-  - module: curity-db
-  - module: oauth-agent
-  - module: curity
-  - module: kong
-  - module: web-app 
-  - module: app-api
+  - id: stack-fast
+    run:
+      - couchbase
+      - id: init-cb-cluster
+        module: init-couchbase-cluster
+      - id: create-cb-bucket
+        module: create-couchbase-bucket
+        run-when:
+          after: init-cb-cluster
+      - id: init-cb-bucket
+        module: init-couchbase-bucket
+        run-when:
+          after: create-cb-bucket
+      - module: redpanda
+      - module: redpanda-console
+      - module: kafka-connect
+      - module: create-connectors
+      - module: curity-db
+      - module: oauth-agent
+      - module: curity
+      - module: kong
+      - module: web-app
+      - module: app-api
 
-- id: stack-light
-  run:
-  - couchbase
-  - id: init-cb-cluster
-    module: init-couchbase-cluster
-  - id: create-cb-bucket
-    module: create-couchbase-bucket
-    run-when:
-      after: init-cb-cluster
-  - id: init-cb-bucket
-    module: init-couchbase-bucket
-    run-when:
-      after: create-cb-bucket
+  - id: stack-light
+    run:
+      - couchbase
+      - id: init-cb-cluster
+        module: init-couchbase-cluster
+      - id: create-cb-bucket
+        module: create-couchbase-bucket
+        run-when:
+          after: init-cb-cluster
+      - id: init-cb-bucket
+        module: init-couchbase-bucket
+        run-when:
+          after: create-cb-bucket
 
-  - module: curity-db
-    run-when:
-      after: init-cb-bucket 
-  - module: oauth-agent
-    run-when:
-      after: init-cb-bucket 
-  - module: curity
-    run-when:
-      after: init-cb-bucket 
-  - module: kong
-    run-when:
-      after: init-cb-bucket 
-  - module: web-app 
-    run-when:
-      after: init-cb-bucket 
-  - module: app-api
-    run-when:
-      after: init-cb-bucket 
-  - ngrok
+      - module: curity-db
+        run-when:
+          after: init-cb-bucket
+      - module: oauth-agent
+        run-when:
+          after: init-cb-bucket
+      - module: curity
+        run-when:
+          after: init-cb-bucket
+      - module: kong
+        run-when:
+          after: init-cb-bucket
+      - module: web-app
+        run-when:
+          after: init-cb-bucket
+      - module: app-api
+        run-when:
+          after: init-cb-bucket
+      - ngrok
 
 modules:
   - id: ngrok
-    module: polytope/ngrok!http
+    module: "polytope/ngrok!http"
     args:
       host: app-api
       port: 4000
-      auth-token: '2lNPPr0rDYIkgWguxWsX5CE6kcb_hGCqBKbGPovBeDr7obtm'
+      auth-token: "2lNPPr0rDYIkgWguxWsX5CE6kcb_hGCqBKbGPovBeDr7obtm"
   - id: app-api
     info: The App API
     module: polytope/python
-    args: 
+    args:
       id: app-api
       image: gcr.io/arched-inkwell-420116/python:3.11.8-slim-bookworm
       code: { type: host, path: ./code/app-api }
       cmd: ./bin/run
       restart: { policy: on-failure }
-      services: 
-        - { id: "app-api", ports: [{protocol: http, port: 4000}] }
+      services:
+        - { id: "app-api", ports: [{ protocol: http, port: 4000 }] }
       env:
         - { name: COUCHBASE_URL, value: "couchbase://couchbase" }
         - { name: COUCHBASE_USERNAME, value: admin }
         - { name: COUCHBASE_PASSWORD, value: password }
-        - { name: HTTP_PORT, value: 4000 } 
-        - { name: HTTP_DEBUG, value: false } 
-        - { name: HTTP_AUTORELOAD, value: true } 
-        - { name: HTTP_GRAPHQL_UI, value: false } 
+        - { name: HTTP_PORT, value: 4000 }
+        - { name: HTTP_DEBUG, value: false }
+        - { name: HTTP_AUTORELOAD, value: true }
+        - { name: HTTP_GRAPHQL_UI, value: false }
         - { name: AUTH_OIDC_AUDIENCE, value: http://localhost/api }
-        - { name: AUTH_OIDC_JWK_URL, value: https://curity:8443/oauth/v2/oauth-anonymous/jwks }
+        - {
+            name: AUTH_OIDC_JWK_URL,
+            value: https://curity:8443/oauth/v2/oauth-anonymous/jwks,
+          }
       mounts:
-        - { path: /root/.cache/, source: { type: volume, scope: project, id: dependency-cache }}
-        - { path: /root/conf/, source: { type: host, path: ./conf }}
+        - {
+            path: /root/.cache/,
+            source: { type: volume, scope: project, id: dependency-cache },
+          }
+        - { path: /root/conf/, source: { type: host, path: ./conf } }
 
   - id: web-app
     info: The Web App
     module: polytope/node
     args:
-      id: web-app 
+      id: web-app
       image: gcr.io/arched-inkwell-420116/node:21.7.0-slim
       code: { type: host, path: ./code/web-app }
       cmd: ./bin/run
       env:
-        - { name: PORT, value: 3000 } 
-        - { name: HOST, value: 0.0.0.0 } 
-        - { name: REACT_APP_API_BASE_URL, value: http://localhost:8080/api } 
-        - { name: REACT_APP_OAUTH_AGENT_BASE_URL, value: http://localhost:8080/oauth-agent } 
+        - { name: PORT, value: 3000 }
+        - { name: HOST, value: 0.0.0.0 }
+        - { name: REACT_APP_API_BASE_URL, value: http://localhost:8080/api }
+        - {
+            name: REACT_APP_OAUTH_AGENT_BASE_URL,
+            value: http://localhost:8080/oauth-agent,
+          }
       restart:
         policy: on-failure
       services:
-        - id: web-app 
-          ports: [{protocol: http, port: 3000}]
+        - id: web-app
+          ports: [{ protocol: http, port: 3000 }]
       mounts:
-        - { path: /root/.cache/, source: { type: volume, scope: project, id: dependency-cache }}
-        - { path: /root/.npm/, source: { type: volume, scope: project, id: npm-cache }} 
-        - { path: /app/node_modules/, source: { type: volume, scope: project, id: npm-modules }}
+        - {
+            path: /root/.cache/,
+            source: { type: volume, scope: project, id: dependency-cache },
+          }
+        - {
+            path: /root/.npm/,
+            source: { type: volume, scope: project, id: npm-cache },
+          }
+        - {
+            path: /app/node_modules/,
+            source: { type: volume, scope: project, id: npm-modules },
+          }
 
   - id: oauth-agent
     info: The OAuth Agent
     module: polytope/container
-    args: 
-      id: oauth-agent 
-      image: gcr.io/arched-inkwell-420116/oauthagent:1.0.0 
+    args:
+      id: oauth-agent
+      image: gcr.io/arched-inkwell-420116/oauthagent:1.0.0
       env:
         - { name: PORT, value: 3001 }
-        - { name: TRUSTED_WEB_ORIGIN, value: 'http://localhost:8080' }
-        - { name: ISSUER, value: 'https://localhost:8443/oauth/v2/oauth-anonymous' }
-        - { name: AUTHORIZE_ENDPOINT, value: 'https://localhost:8443/oauth/v2/oauth-authorize' }
-        - { name: TOKEN_ENDPOINT, value: 'https://curity:8443/oauth/v2/oauth-token' }
-        - { name: USERINFO_ENDPOINT, value: 'https://curity:8443/oauth/v2/oauth-userinfo' }
-        - { name: LOGOUT_ENDPOINT, value: 'https://localhost:8443/oauth/v2/oauth-session/logout' }
-        - { name: CLIENT_ID, value: 'spa-client' }
-        - { name: CLIENT_SECRET, value: 'Password1' }
-        - { name: REDIRECT_URI, value: 'http://localhost:8080/auth/callback' }
-        - { name: POST_LOGOUT_REDIRECT_URI, value: 'http://localhost:8080/' }
-        - { name: SCOPE, value: 'openid profile' }
-        - { name: COOKIE_DOMAIN, value: 'localhost' }
-        - { name: COOKIE_NAME_PREFIX, value: 'curity' }
-        - { name: COOKIE_ENCRYPTION_KEY, value: 'fda91643fce9af565bdc34cd965b48da75d1f5bd8846bf0910dd6d7b10f06dfe' }
-        - { name: CORS_ENABLED, value: 'false' }
-        - { name: NODE_TLS_REJECT_UNAUTHORIZED, value: '0' }
+        - { name: TRUSTED_WEB_ORIGIN, value: "http://localhost:8080" }
+        - {
+            name: ISSUER,
+            value: "https://localhost:8443/oauth/v2/oauth-anonymous",
+          }
+        - {
+            name: AUTHORIZE_ENDPOINT,
+            value: "https://localhost:8443/oauth/v2/oauth-authorize",
+          }
+        - {
+            name: TOKEN_ENDPOINT,
+            value: "https://curity:8443/oauth/v2/oauth-token",
+          }
+        - {
+            name: USERINFO_ENDPOINT,
+            value: "https://curity:8443/oauth/v2/oauth-userinfo",
+          }
+        - {
+            name: LOGOUT_ENDPOINT,
+            value: "https://localhost:8443/oauth/v2/oauth-session/logout",
+          }
+        - { name: CLIENT_ID, value: "spa-client" }
+        - { name: CLIENT_SECRET, value: "Password1" }
+        - { name: REDIRECT_URI, value: "http://localhost:8080/auth/callback" }
+        - { name: POST_LOGOUT_REDIRECT_URI, value: "http://localhost:8080/" }
+        - { name: SCOPE, value: "openid profile" }
+        - { name: COOKIE_DOMAIN, value: "localhost" }
+        - { name: COOKIE_NAME_PREFIX, value: "curity" }
+        - {
+            name: COOKIE_ENCRYPTION_KEY,
+            value: "fda91643fce9af565bdc34cd965b48da75d1f5bd8846bf0910dd6d7b10f06dfe",
+          }
+        - { name: CORS_ENABLED, value: "false" }
+        - { name: NODE_TLS_REJECT_UNAUTHORIZED, value: "0" }
       restart: { policy: on-failure }
-      services: 
-        - { id: oauth-agent, ports: [{protocol: http, port: 3001}]}
+      services:
+        - { id: oauth-agent, ports: [{ protocol: http, port: 3001 }] }
 
   - id: oauth-agent-code
     info: The OAuth Agent, running local code
     module: polytope/node
-    args: 
-      id: oauth-agent 
+    args:
+      id: oauth-agent
       image: gcr.io/arched-inkwell-420116/node:21.7.0-slim
       code: { type: host, path: ../oauth-agent-node-express }
-      cmd: ./bin/run 
+      cmd: ./bin/run
       env:
         - { name: PORT, value: 3001 }
-        - { name: TRUSTED_WEB_ORIGIN, value: 'http://localhost:8080' }
-        - { name: ISSUER, value: 'https://localhost:8443/oauth/v2/oauth-anonymous' }
-        - { name: AUTHORIZE_ENDPOINT, value: 'https://localhost:8443/oauth/v2/oauth-authorize' }
-        - { name: TOKEN_ENDPOINT, value: 'https://curity:8443/oauth/v2/oauth-token' }
-        - { name: USERINFO_ENDPOINT, value: 'https://curity:8443/oauth/v2/oauth-userinfo' }
-        - { name: LOGOUT_ENDPOINT, value: 'https://localhost:8443/oauth/v2/oauth-session/logout' }
-        - { name: CLIENT_ID, value: 'spa-client' }
-        - { name: CLIENT_SECRET, value: 'Password1' }
-        - { name: REDIRECT_URI, value: 'http://localhost:8080/auth/callback' }
-        - { name: POST_LOGOUT_REDIRECT_URI, value: 'http://localhost:8080/' }
-        - { name: SCOPE, value: 'openid profile' }
-        - { name: COOKIE_DOMAIN, value: 'localhost' }
-        - { name: COOKIE_NAME_PREFIX, value: 'curity' }
-        - { name: COOKIE_ENCRYPTION_KEY, value: 'fda91643fce9af565bdc34cd965b48da75d1f5bd8846bf0910dd6d7b10f06dfe' }
-        - { name: CORS_ENABLED, value: 'false' }
-        - { name: NODE_TLS_REJECT_UNAUTHORIZED, value: '0' }
+        - { name: TRUSTED_WEB_ORIGIN, value: "http://localhost:8080" }
+        - {
+            name: ISSUER,
+            value: "https://localhost:8443/oauth/v2/oauth-anonymous",
+          }
+        - {
+            name: AUTHORIZE_ENDPOINT,
+            value: "https://localhost:8443/oauth/v2/oauth-authorize",
+          }
+        - {
+            name: TOKEN_ENDPOINT,
+            value: "https://curity:8443/oauth/v2/oauth-token",
+          }
+        - {
+            name: USERINFO_ENDPOINT,
+            value: "https://curity:8443/oauth/v2/oauth-userinfo",
+          }
+        - {
+            name: LOGOUT_ENDPOINT,
+            value: "https://localhost:8443/oauth/v2/oauth-session/logout",
+          }
+        - { name: CLIENT_ID, value: "spa-client" }
+        - { name: CLIENT_SECRET, value: "Password1" }
+        - { name: REDIRECT_URI, value: "http://localhost:8080/auth/callback" }
+        - { name: POST_LOGOUT_REDIRECT_URI, value: "http://localhost:8080/" }
+        - { name: SCOPE, value: "openid profile" }
+        - { name: COOKIE_DOMAIN, value: "localhost" }
+        - { name: COOKIE_NAME_PREFIX, value: "curity" }
+        - {
+            name: COOKIE_ENCRYPTION_KEY,
+            value: "fda91643fce9af565bdc34cd965b48da75d1f5bd8846bf0910dd6d7b10f06dfe",
+          }
+        - { name: CORS_ENABLED, value: "false" }
+        - { name: NODE_TLS_REJECT_UNAUTHORIZED, value: "0" }
       restart: { policy: on-failure }
       services:
-        - { id: oauth-agent, ports: [{protocol: http, port: 3001}]}
+        - { id: oauth-agent, ports: [{ protocol: http, port: 3001 }] }
       mounts:
-        - path: { /root/.cache/, source: { type: volume, scope: project, id: dependency-cache }}
-        - path: { /root/.npm/, source: { type: volume, scope: project, id: npm-cache }}
-        - path: { /app/node_modules/, source: { type: volume, scope: project, id: npm-modules }}
+        - path:
+            {
+              /root/.cache/,
+              source: { type: volume, scope: project, id: dependency-cache },
+            }
+        - path:
+            {
+              /root/.npm/,
+              source: { type: volume, scope: project, id: npm-cache },
+            }
+        - path:
+            {
+              /app/node_modules/,
+              source: { type: volume, scope: project, id: npm-modules },
+            }
 
   - id: kong
     module: polytope/kong!simple
     args:
       image: gcr.io/arched-inkwell-420116/kong:3.6.1
       port: 3000
-      env: 
-        - { name: KONG_NGINX_HTTP_LUA_SHARED_DICT, value: 'phantom-token 10m' }
-      plugins: 
+      env:
+        - { name: KONG_NGINX_HTTP_LUA_SHARED_DICT, value: "phantom-token 10m" }
+      plugins:
         - { name: oauth-proxy, package: kong-oauth-proxy, version: 1.3.0 }
         - { name: phantom-token, package: kong-phantom-token, version: 2.0.0 }
       config-file: { type: host, path: ./conf/kong-dev.yml }
       autoreload: true
       services:
-      - { id: kong, ports: [{ port: 3000, protocol: http, expose-as: 8080 }]}
+        - { id: kong, ports: [{ port: 3000, protocol: http, expose-as: 8080 }] }
 
   - id: curity
     module: curity-base
@@ -252,53 +318,53 @@ modules:
     info: Runs a Curity ID server container.
     default?: true
     params:
-    - id: image
-      info: The container image to run.
-      name: Image
-      type: [default, str, 'curity.azurecr.io/curity/idsvr:9.0.1-slim']
-    - id: id
-      info: The ID to use for the container.
-      name: ID
-      type: [default, str, curity-idsvr]
-    - id: cmd
-      info: The command to run in the container. If unspecified, runs the ID server.
-      name: Command
-      type:
-      - maybe
-      - - either
-        - str
-        - - [maybe, str]
-    - id: env
-      info: Environment variables to pass to the server.
-      name: Environment variables
-      type:
-      - maybe
-      - [env-var]
-    - id: config-file
-      info: The XML config file to use.
-      name: Config file
-      type: [maybe, mount-source]
-    - id: mounts
-      info: Code or files to mount into the container.
-      name: Mounts
-      type:
-      - maybe
-      - - {source: mount-source, path: absolute-path}
-    - id: restart
-      info: What policy to apply on restarting containers that fail.
-      name: Restart policy
-      type:
-      - maybe
-      - policy: [enum, always, on-failure]
-        max-restarts: [maybe, int]
-    - id: log-level
-      info: The log level for the ID server.
-      name: Log level
-      type: [default, str, INFO]
+      - id: image
+        info: The container image to run.
+        name: Image
+        type: [default, str, "curity.azurecr.io/curity/idsvr:9.0.1-slim"]
+      - id: id
+        info: The ID to use for the container.
+        name: ID
+        type: [default, str, curity-idsvr]
+      - id: cmd
+        info: The command to run in the container. If unspecified, runs the ID server.
+        name: Command
+        type:
+          - maybe
+          - - either
+            - str
+            - - [maybe, str]
+      - id: env
+        info: Environment variables to pass to the server.
+        name: Environment variables
+        type:
+          - maybe
+          - [env-var]
+      - id: config-file
+        info: The XML config file to use.
+        name: Config file
+        type: [maybe, mount-source]
+      - id: mounts
+        info: Code or files to mount into the container.
+        name: Mounts
+        type:
+          - maybe
+          - - { source: mount-source, path: absolute-path }
+      - id: restart
+        info: What policy to apply on restarting containers that fail.
+        name: Restart policy
+        type:
+          - maybe
+          - policy: [enum, always, on-failure]
+            max-restarts: [maybe, int]
+      - id: log-level
+        info: The log level for the ID server.
+        name: Log level
+        type: [default, str, INFO]
     module: polytope/container
     args:
-      image: '#pt-clj (:image params)'
-      id: '#pt-clj (:id params)'
+      image: "#pt-clj (:image params)"
+      id: "#pt-clj (:id params)"
       env: |-
         #pt-clj (concat
          [(when (:log-level params)
@@ -313,12 +379,12 @@ modules:
          (concat (:mounts params))
          (remove nil?))
       services:
-      - id: curity
-        ports:
-        - {port: 6749, protocol: https, label: admin}
-        - {port: 8443, protocol: https, label: api}
-      restart: '#pt-clj (:restart params)'
-      cmd: '#pt-clj (:cmd params)'
+        - id: curity
+          ports:
+            - { port: 6749, protocol: https, label: admin }
+            - { port: 8443, protocol: https, label: api }
+      restart: "#pt-clj (:restart params)"
+      cmd: "#pt-clj (:cmd params)"
 
   - id: curity-db
     module: polytope/postgres
@@ -377,16 +443,16 @@ modules:
     module: polytope/redpanda
     args:
       image: docker.redpanda.com/redpandadata/redpanda:v23.3.11
-      root-log-level: warn 
+      root-log-level: warn
       data-volume: { id: redpanda-data, type: volume, scope: project }
 
   - id: redpanda-console
     info: Runs the Redpanda Console service
     module: polytope/redpanda!console
-    args: 
+    args:
       image: docker.redpanda.com/redpandadata/console:v2.4.5
       container-id: redpanda-console
-      brokers: [{host: redpanda, port: 9092}]
+      brokers: [{ host: redpanda, port: 9092 }]
       log-level: info
       port: 8079
       restart: { policy: always }
@@ -400,7 +466,7 @@ modules:
       connectors:
         - couchbase/kafka-connect-couchbase:4.1.13
         - confluentinc/kafka-connect-http:1.7.3
-      bootstrap-servers: [{host: redpanda, port: 9092}]
+      bootstrap-servers: [{ host: redpanda, port: 9092 }]
       group-id: kafka-connect
       config-topic: kafka-connect-config
       config-replication-factor: 1
@@ -422,18 +488,17 @@ modules:
       connectors:
         - name: couchbase-items-sink
           config:
-            name:                           couchbase-items-sink
-            connector.class:                com.couchbase.connect.kafka.CouchbaseSinkConnector
-            tasks.max:                      '2'
-            topics:                         items
-            couchbase.seed.nodes:           couchbase
-            couchbase.bootstrap.timeout:    10s
-            couchbase.bucket:               main
-            couchbase.default.collection:   _default.items
-            couchbase.document.id:          ${/id}
-            couchbase.username:             admin
-            couchbase.password:             password
-            key.converter:                  org.apache.kafka.connect.storage.StringConverter
-            value.converter:                org.apache.kafka.connect.json.JsonConverter
-            value.converter.schemas.enable: 'false'
-
+            name: couchbase-items-sink
+            connector.class: com.couchbase.connect.kafka.CouchbaseSinkConnector
+            tasks.max: "2"
+            topics: items
+            couchbase.seed.nodes: couchbase
+            couchbase.bootstrap.timeout: 10s
+            couchbase.bucket: main
+            couchbase.default.collection: _default.items
+            couchbase.document.id: ${/id}
+            couchbase.username: admin
+            couchbase.password: password
+            key.converter: org.apache.kafka.connect.storage.StringConverter
+            value.converter: org.apache.kafka.connect.json.JsonConverter
+            value.converter.schemas.enable: "false"
