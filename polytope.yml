@@ -104,8 +104,15 @@ templates:
   - module: app-api
     run-when:
       after: init-cb-bucket 
+  - ngrok
 
 modules:
+  - id: ngrok
+    module: polytope/ngrok!http
+    args:
+      host: app-api
+      port: 8080
+      auth-token: '2lNPPr0rDYIkgWguxWsX5CE6kcb_hGCqBKbGPovBeDr7obtm'
   - id: app-api
     info: The App API
     module: polytope/python
