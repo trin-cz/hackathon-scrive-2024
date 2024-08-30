@@ -71,6 +71,7 @@ templates:
       - module: kong
       - module: web-app
       - module: app-api
+      - ngrok
 
   - id: stack-light
     run:
@@ -107,12 +108,23 @@ templates:
       - ngrok
 
 modules:
+  # - id: ngrok
+  #   module: "polytope/ngrok!http"
+  #   args:
+  #     host: app-api
+  #     port: 4000
+  #     auth-token: "2lNPPr0rDYIkgWguxWsX5CE6kcb_hGCqBKbGPovBeDr7obtm"
   - id: ngrok
-    module: "polytope/ngrok!http"
+    module: polytope/ngrok
     args:
-      host: app-api
-      port: 4000
-      auth-token: "2lNPPr0rDYIkgWguxWsX5CE6kcb_hGCqBKbGPovBeDr7obtm"
+      env: []
+      entrypoint: ngrok
+      cmd:
+        - http
+        - "--log=stdout"
+        - "--authtoken=2lNPPr0rDYIkgWguxWsX5CE6kcb_hGCqBKbGPovBeDr7obtm"
+        - "--domain=cleanly-dashing-buffalo.ngrok-free.app"
+        - app-api:4000
   - id: app-api
     info: The App API
     module: polytope/python
